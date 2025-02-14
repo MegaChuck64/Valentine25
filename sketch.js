@@ -3,6 +3,10 @@ let landPoints = [];
 let landPoints2 = [];
 let landPoints3 = [];
 let flowers = [];
+let trees = [];
+let heartBalloon;
+let penguins = [];
+let smallHearts = [];
 
 let moonX = 0;
 let moonY = 0;
@@ -14,46 +18,54 @@ function setup() {
 
   // Create the stars
   for (let i = 0; i < 100; i++) {
+    // Create a star
+    let star = {
+      x: random(width),
+      y: random(height)
+    };
 
-	// Create a star
-	let star = {
-	  x: random(width),
-	  y: random(height)
-	};
-
-	// Add the star to the array
-	stars.push(star);
+    // Add the star to the array
+    stars.push(star);
   }
 
-  //add landscape
+  // Add landscape
   for (let i = 0; i < 100; i++) {
-	//height map moving across the screen left to right
-	let landPoint = createLandPoint(i, 0.02, 0.5);
-	landPoints.push(landPoint);
+    // Height map moving across the screen left to right
+    let landPoint = createLandPoint(i, 0.02, 0.5);
+    landPoints.push(landPoint);
 
-	let landPoint2 = createLandPoint(i, 0.01, 0.6);
-	landPoints2.push(landPoint2);
+    let landPoint2 = createLandPoint(i, 0.01, 0.6);
+    landPoints2.push(landPoint2);
 
-	let landPoint3 = createLandPoint(i, 0.005, 0.75);
-	landPoints3.push(landPoint3);
-	
+    let landPoint3 = createLandPoint(i, 0.005, 0.75);
+    landPoints3.push(landPoint3);
   }
 
   // Create flowers
-  for (let i = 0; i < 65; i++) {
-
-		// Create a flower
-		let flower = createFlower();
-		flowers.push(flower);
-		
+  for (let i = 0; i < 30; i++) {
+    // Create a flower
+    let flower = createFlower();
+    flowers.push(flower);
   }
+
+  // Create trees along landPoints2
+  for (let i = 0; i < 10; i++) {
+    let tree = createTree();
+    trees.push(tree);
+  }
+
+  // Create a single heart balloon
+  heartBalloon = createHeart();
+
+  // Create a pair of penguins
+  penguins.push(createPenguin());
+  penguins.push(createPenguin());
+
   // Set the frame rate
   frameRate(30);
 
   // Set the background color
   background(0);
-
-
 }
 
 function createFlower() {
@@ -72,8 +84,8 @@ function createFlower() {
   let flower = {
     x: x,
     y: y,
-    color: color(random(255 / 2), random(255 / 2), random(255 / 2)),
-    size: random(5, 10),
+    color: color(random(100, 255), random(100, 255), random(100, 255)),
+    size: random(10, 20),
     numPetals: numPetals,
     petalSizes: petalSizes,
     centerColor: centerColor
@@ -82,20 +94,55 @@ function createFlower() {
   return flower;
 }
 
-function createLandPoint(ndx, noiseScale, heightScale)
-{
-	let x = map(ndx, 0, 100, 0, width);
-	let y = map(noise(ndx * noiseScale), 0, 1, height * heightScale, height);
-	let landPoint = {
-	  x: x,
-	  y: y
-	};
-
-	return landPoint;
+function createTree() {
+  // Randomly select a land point from landPoints2
+  let landPoint = random(landPoints2);
+  return {
+    x: landPoint.x,
+    y: random(landPoint.y, height), // Spread trees throughout the entire range of landPoints2
+    trunkHeight: random(40, 80),
+    trunkWidth: random(10, 20),
+    canopySize: random(50, 70),
+    canopyColor: color(random(0, 100), random(100, 150), random(0, 100)),
+    leafShape: random(['ellipse', 'circle', 'oval']) // Random leaf shape
+  };
 }
 
-//slow moving stars and slow moving moon across the night sky
+function createHeart() {
+  let x = random(width);
+  let y = random(height * 0.5); // Hearts in the upper half of the canvas
+  let size = random(20, 30);
+  let clr = color(random(200, 255), random(0, 100), random(100, 150));
+  let speedY = random(0.5, 1.5); // Speed of the balloon
+  let speedX = random(-0.5, 0.5); // Horizontal speed of the balloon
+  return { x: x, y: y, size: size, color: clr, speedY: speedY, speedX: speedX };
+}
 
+function createPenguin() {
+  let x = random(width);
+  let y = random(height * 0.75, height); // Penguins in the lower part of the canvas
+  let size = random(20, 40);
+  return { x, y, size };
+}
+
+function createSmallHeart(x, y) {
+  let size = random(5, 10);
+  let clr = color(random(200, 255), random(0, 100), random(100, 150));
+  let speedX = random(-2, 2);
+  let speedY = random(-2, 2);
+  return { x: x, y: y, size: size, color: clr, speedX: speedX, speedY: speedY };
+}
+
+function createLandPoint(ndx, noiseScale, heightScale) {
+  let x = map(ndx, 0, 100, 0, width);
+  let y = map(noise(ndx * noiseScale), 0, 1, height * heightScale, height);
+  let landPoint = {
+    x: x,
+    y: y
+  };
+
+  return landPoint;
+}
 
 function draw() {
   // Set the background color
@@ -162,6 +209,14 @@ function draw() {
   vertex(0, height);
   endShape(CLOSE);
 
+  // Sort trees by y coordinate in ascending order
+  trees.sort((a, b) => a.y - b.y);
+
+  // Draw trees
+  for (let tree of trees) {
+    drawTree(tree.x, tree.y, tree.trunkHeight, tree.trunkWidth, tree.canopySize, tree.canopyColor, tree.leafShape);
+  }
+
   // Draw landscape as a shape
   beginShape();
   fill(0, 120, 0);
@@ -190,6 +245,47 @@ function draw() {
     // Draw flowers
     drawFlower(flower.x, flower.y, flower.size, flower.color, flower.numPetals, flower.petalSizes, flower.centerColor);
   }
+
+  // Draw the heart balloon
+  drawHeart(heartBalloon);
+
+  // Draw the penguins holding the string
+  for (let penguin of penguins) {
+    drawPenguin(penguin);
+  }
+
+  // Draw and animate small hearts
+  for (let i = smallHearts.length - 1; i >= 0; i--) {
+    let heart = smallHearts[i];
+    drawSmallHeart(heart);
+    heart.x += heart.speedX;
+    heart.y += heart.speedY;
+
+    // Remove hearts that go off the screen
+    if (heart.x < 0 || heart.x > width || heart.y < 0 || heart.y > height) {
+      smallHearts.splice(i, 1);
+    }
+  }
+}
+
+function drawTree(x, y, trunkHeight, trunkWidth, canopySize, canopyColor, leafShape) {
+  // Draw the trunk
+  fill(101, 67, 33); // Darker brown color for the trunk
+  rect(x - trunkWidth / 2, y, trunkWidth, trunkHeight); // Trunk
+
+  // Draw the canopy
+  noStroke();
+  fill(canopyColor); // Randomized green color for the canopy
+  if (leafShape === 'ellipse') {
+    ellipse(x, y - trunkHeight / 2, canopySize, canopySize); // Main canopy
+    ellipse(x - 10, y - trunkHeight / 2 - 5, canopySize * 0.7, canopySize * 0.7); // Left canopy
+    ellipse(x + 10, y - trunkHeight / 2 - 5, canopySize * 0.7, canopySize * 0.7); // Right canopy
+    ellipse(x, y - trunkHeight / 2 - 15, canopySize * 0.8, canopySize * 0.8); // Top canopy
+  } else if (leafShape === 'circle') {
+    ellipse(x, y - trunkHeight / 2, canopySize, canopySize); // Main canopy
+  } else if (leafShape === 'oval') {
+    ellipse(x, y - trunkHeight / 2, canopySize * 1.2, canopySize * 0.8); // Main canopy
+  }
 }
 
 function drawFlower(x, y, size, clr, numPetals, petalSizes, centerColor) {
@@ -210,3 +306,87 @@ function drawFlower(x, y, size, clr, numPetals, petalSizes, centerColor) {
   ellipse(x, y, size * 0.5, size * 0.5); // Smaller center
 }
 
+function drawHeart(heart) {
+  fill(heart.color);
+  noStroke();
+  beginShape();
+  vertex(heart.x, heart.y);
+  bezierVertex(heart.x - heart.size / 2, heart.y - heart.size / 2, heart.x - heart.size, heart.y + heart.size / 3, heart.x, heart.y + heart.size);
+  bezierVertex(heart.x + heart.size, heart.y + heart.size / 3, heart.x + heart.size / 2, heart.y - heart.size / 2, heart.x, heart.y);
+  endShape(CLOSE);
+
+  // Move the heart upwards and horizontally
+  heart.y -= heart.speedY;
+  heart.x += heart.speedX;
+
+  // Wrap around the screen
+  if (heart.y < 0) {
+    heart.y = height;
+  }
+  if (heart.x > width) {
+    heart.x = 0;
+  } else if (heart.x < 0) {
+    heart.x = width;
+  }
+
+  // Draw the string
+  stroke(255);
+  line(heart.x, heart.y + heart.size, heart.x, heart.y + heart.size + 50);
+
+  // Update penguins' positions
+  penguins[0].x = heart.x - 10;
+  penguins[0].y = heart.y + heart.size + 50;
+  penguins[1].x = heart.x + 10;
+  penguins[1].y = heart.y + heart.size + 50;
+}
+
+function drawPenguin(penguin) {
+  let { x, y, size } = penguin;
+
+  // Draw the body
+  fill(0);
+  ellipse(x, y, size, size * 1.5);
+
+  // Draw the belly
+  fill(255);
+  ellipse(x, y + size * 0.1, size * 0.6, size * 1.1);
+
+  // Draw the eyes
+  fill(255);
+  ellipse(x - size * 0.2, y - size * 0.3, size * 0.2, size * 0.2);
+  ellipse(x + size * 0.2, y - size * 0.3, size * 0.2, size * 0.2);
+  fill(0);
+  ellipse(x - size * 0.2, y - size * 0.3, size * 0.1, size * 0.1);
+  ellipse(x + size * 0.2, y - size * 0.3, size * 0.1, size * 0.1);
+
+  // Draw the beak
+  fill(255, 165, 0);
+  triangle(x, y - size * 0.2, x - size * 0.1, y - size * 0.1, x + size * 0.1, y - size * 0.1);
+
+  // Draw the feet
+  fill(255, 165, 0);
+  ellipse(x - size * 0.2, y + size * 0.75, size * 0.2, size * 0.1);
+  ellipse(x + size * 0.2, y + size * 0.75, size * 0.2, size * 0.1);
+}
+
+function drawSmallHeart(heart) {
+  fill(heart.color);
+  noStroke();
+  beginShape();
+  vertex(heart.x, heart.y);
+  bezierVertex(heart.x - heart.size / 2, heart.y - heart.size / 2, heart.x - heart.size, heart.y + heart.size / 3, heart.x, heart.y + heart.size);
+  bezierVertex(heart.x + heart.size, heart.y + heart.size / 3, heart.x + heart.size / 2, heart.y - heart.size / 2, heart.x, heart.y);
+  endShape(CLOSE);
+}
+
+function mousePressed() {
+  for (let penguin of penguins) {
+    let d = dist(mouseX, mouseY, penguin.x, penguin.y);
+    if (d < penguin.size) {
+      for (let i = 0; i < 20; i++) {
+        let smallHeart = createSmallHeart(penguin.x, penguin.y);
+        smallHearts.push(smallHeart);
+      }
+    }
+  }
+}

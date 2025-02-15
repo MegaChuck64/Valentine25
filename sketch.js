@@ -133,7 +133,7 @@ function createFlower() {
   function createHeart() {
 	let x = random(width);
 	let y = random(height * 0.5); // Hearts in the upper half of the canvas
-	let size = random(75, 100);
+	let size = random(110, 150);
 	let clr = color(random(200, 255), random(0, 100), random(100, 150));
 	let speedY = random(0.5, 1.5); // Speed of the balloon
 	let speedX = random(-0.5, 0.5); // Horizontal speed of the balloon
@@ -143,7 +143,7 @@ function createFlower() {
   function createPenguin() {
 	let x = random(width);
 	let y = random(height * 0.75, height); // Penguins in the lower part of the canvas
-	let size = random(50, 75);
+	let size = random(100, 120);
 	return { x, y, size };
   }
   
@@ -356,17 +356,20 @@ function drawHeart(heart) {
     } else if (heart.x < 0) {
       heart.x = width;
     }
+
+    penguins[0].x = heart.x - 64;
+    penguins[0].y = heart.y + heart.size + 100;
+    penguins[1].x = heart.x + 64;
+    penguins[1].y = heart.y + heart.size + 100;
   }
 
-    penguins[0].x = heart.x - 16;
-    penguins[0].y = heart.y + heart.size + 50;
-    penguins[1].x = heart.x + 16;
-    penguins[1].y = heart.y + heart.size + 50;
+
   }
   // Draw the string
   stroke(255);
-  line(heart.x, heart.y + heart.size, heart.x, heart.y + heart.size + 50);
-
+  strokeWeight(4);
+  line(heart.x, heart.y + heart.size, heart.x, heart.y + heart.size + 110);
+  strokeWeight(1);
 
 }
 
@@ -415,7 +418,7 @@ function drawConversation() {
   let penguin2 = penguins[1];
 
   fill(255);
-  textSize(20);
+  textSize(32);
   textAlign(CENTER);
   if (showQuestion) {
     text(currentPair[0], penguin1.x, penguin1.y - penguin1.size * 1.5);
@@ -459,10 +462,10 @@ function mouseDragged() {
   if (draggingHeart) {
     heartBalloon.x = mouseX + offsetX;
     heartBalloon.y = mouseY + offsetY;
-    penguins[0].x = heartBalloon.x - 16;
-    penguins[0].y = heartBalloon.y + heartBalloon.size + 50;
-    penguins[1].x = heartBalloon.x + 16;
-    penguins[1].y = heartBalloon.y + heartBalloon.size + 50;
+    penguins[0].x = heartBalloon.x - 64;
+    penguins[0].y = heartBalloon.y + heartBalloon.size + 100;
+    penguins[1].x = heartBalloon.x + 64;
+    penguins[1].y = heartBalloon.y + heartBalloon.size + 100;
   } else if (draggingPenguin) {
     draggingPenguin.x = mouseX + offsetX;
     draggingPenguin.y = mouseY + offsetY;
@@ -472,4 +475,10 @@ function mouseDragged() {
 function mouseReleased() {
   draggingPenguin = null;
   draggingHeart = false;
+  // Create a buncha small heart when the mouse is released
+  for (let i = 0; i < 10; i++) {
+    let smallHeart = createSmallHeart(mouseX, mouseY);
+    smallHearts.push(smallHeart);
+  }
+
 }

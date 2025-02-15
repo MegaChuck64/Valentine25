@@ -133,7 +133,7 @@ function createFlower() {
   function createHeart() {
 	let x = random(width);
 	let y = random(height * 0.5); // Hearts in the upper half of the canvas
-	let size = random(40, 80);
+	let size = random(75, 100);
 	let clr = color(random(200, 255), random(0, 100), random(100, 150));
 	let speedY = random(0.5, 1.5); // Speed of the balloon
 	let speedX = random(-0.5, 0.5); // Horizontal speed of the balloon
@@ -143,7 +143,7 @@ function createFlower() {
   function createPenguin() {
 	let x = random(width);
 	let y = random(height * 0.75, height); // Penguins in the lower part of the canvas
-	let size = random(38, 42);
+	let size = random(50, 75);
 	return { x, y, size };
   }
   

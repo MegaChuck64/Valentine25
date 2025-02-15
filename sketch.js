@@ -29,6 +29,7 @@ let showQuestion = true;
 let draggingPenguin = null;
 let draggingHeart = false;
 let offsetX, offsetY;
+let playing = false;
 
 function setup() {
   // Set the canvas' width and height
@@ -88,6 +89,8 @@ function setup() {
 
   // Initialize the first phrase
   currentPhraseIndex = int(random(conversationPairs.length));
+
+
 }
 
 function createFlower() {
@@ -479,6 +482,13 @@ function mouseReleased() {
   for (let i = 0; i < 10; i++) {
     let smallHeart = createSmallHeart(mouseX, mouseY);
     smallHearts.push(smallHeart);
+    
+  }
+
+  if (!playing) {
+    playing = true;
+    new Audio('A-Very-Tokyo-Valentines.mp3').play();
+
   }
 
 }

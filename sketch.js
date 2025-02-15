@@ -11,6 +11,25 @@ let smallHearts = [];
 let moonX = 0;
 let moonY = 0;
 
+let conversationPairs = [
+  ["Would you be my valentine?", "Yes!"],
+  ["I love you.", "I love you too."],
+  ["I love you more.", "No, I love you more."],
+  ["No, I am the one who loves you more.", "Nu-uh, It is I. I love you more."],
+  ["I love you most.", "I love you mostest."],
+  ["I love you mostestest.", "I love you mostestestest."],
+  ["I would I were thy bird.", "Sweet, so would I!"]
+];
+
+let currentPhraseIndex = 0;
+let phraseTimer = 0;
+let phraseInterval = 2000; // Change phrase every 2 seconds
+let showQuestion = true;
+
+let draggingPenguin = null;
+let draggingHeart = false;
+let offsetX, offsetY;
+
 function setup() {
   // Set the canvas' width and height
   // using the display's dimensions.
@@ -66,84 +85,87 @@ function setup() {
 
   // Set the background color
   background(0);
+
+  // Initialize the first phrase
+  currentPhraseIndex = int(random(conversationPairs.length));
 }
 
 function createFlower() {
-  // Only create flowers on the bottom land created by landpoints3
-  let x = random(0, width);
-  let y = random(landPoints3[landPoints3.length - 1].y, height);
-
-  // Precompute flower properties
-  let numPetals = int(random(5, 10));
-  let petalSizes = [];
-  for (let i = 0; i < numPetals; i++) {
-    petalSizes.push(random(0.5, 1));
+	// Only create flowers on the bottom land created by landpoints3
+	let x = random(0, width);
+	let y = random(landPoints3[landPoints3.length - 1].y, height);
+  
+	// Precompute flower properties
+	let numPetals = int(random(5, 10));
+	let petalSizes = [];
+	for (let i = 0; i < numPetals; i++) {
+	  petalSizes.push(random(0.5, 1));
+	}
+	let centerColor = color(random(200, 255), random(150, 200), 0);
+  
+	let flower = {
+	  x: x,
+	  y: y,
+	  color: color(random(100, 255), random(100, 255), random(100, 255)),
+	  size: random(10, 20),
+	  numPetals: numPetals,
+	  petalSizes: petalSizes,
+	  centerColor: centerColor
+	};
+  
+	return flower;
   }
-  let centerColor = color(random(200, 255), random(150, 200), 0);
-
-  let flower = {
-    x: x,
-    y: y,
-    color: color(random(100, 255), random(100, 255), random(100, 255)),
-    size: random(10, 20),
-    numPetals: numPetals,
-    petalSizes: petalSizes,
-    centerColor: centerColor
-  };
-
-  return flower;
-}
-
-function createTree() {
-  // Randomly select a land point from landPoints2
-  let landPoint = random(landPoints2);
-  return {
-    x: landPoint.x,
-    y: random(landPoint.y, height), // Spread trees throughout the entire range of landPoints2
-    trunkHeight: random(40, 80),
-    trunkWidth: random(10, 20),
-    canopySize: random(50, 70),
-    canopyColor: color(random(0, 100), random(100, 150), random(0, 100)),
-    leafShape: random(['ellipse', 'circle', 'oval']) // Random leaf shape
-  };
-}
-
-function createHeart() {
-  let x = random(width);
-  let y = random(height * 0.5); // Hearts in the upper half of the canvas
-  let size = random(20, 30);
-  let clr = color(random(200, 255), random(0, 100), random(100, 150));
-  let speedY = random(0.5, 1.5); // Speed of the balloon
-  let speedX = random(-0.5, 0.5); // Horizontal speed of the balloon
-  return { x: x, y: y, size: size, color: clr, speedY: speedY, speedX: speedX };
-}
-
-function createPenguin() {
-  let x = random(width);
-  let y = random(height * 0.75, height); // Penguins in the lower part of the canvas
-  let size = random(20, 40);
-  return { x, y, size };
-}
-
-function createSmallHeart(x, y) {
-  let size = random(5, 10);
-  let clr = color(random(200, 255), random(0, 100), random(100, 150));
-  let speedX = random(-2, 2);
-  let speedY = random(-2, 2);
-  return { x: x, y: y, size: size, color: clr, speedX: speedX, speedY: speedY };
-}
-
-function createLandPoint(ndx, noiseScale, heightScale) {
-  let x = map(ndx, 0, 100, 0, width);
-  let y = map(noise(ndx * noiseScale), 0, 1, height * heightScale, height);
-  let landPoint = {
-    x: x,
-    y: y
-  };
-
-  return landPoint;
-}
-
+  
+  function createTree() {
+	// Randomly select a land point from landPoints2
+	let landPoint = random(landPoints2);
+	return {
+	  x: landPoint.x,
+	  y: random(landPoint.y, height), // Spread trees throughout the entire range of landPoints2
+	  trunkHeight: random(40, 80),
+	  trunkWidth: random(10, 20),
+	  canopySize: random(50, 70),
+	  canopyColor: color(random(0, 100), random(100, 150), random(0, 100)),
+	  leafShape: random(['ellipse', 'circle', 'oval']) // Random leaf shape
+	};
+  }
+  
+  function createHeart() {
+	let x = random(width);
+	let y = random(height * 0.5); // Hearts in the upper half of the canvas
+	let size = random(40, 80);
+	let clr = color(random(200, 255), random(0, 100), random(100, 150));
+	let speedY = random(0.5, 1.5); // Speed of the balloon
+	let speedX = random(-0.5, 0.5); // Horizontal speed of the balloon
+	return { x: x, y: y, size: size, color: clr, speedY: speedY, speedX: speedX };
+  }
+  
+  function createPenguin() {
+	let x = random(width);
+	let y = random(height * 0.75, height); // Penguins in the lower part of the canvas
+	let size = random(38, 42);
+	return { x, y, size };
+  }
+  
+  function createSmallHeart(x, y) {
+	let size = random(5, 10);
+	let clr = color(random(200, 255), random(0, 100), random(100, 150));
+	let speedX = random(-2, 2);
+	let speedY = random(-2, 2);
+	return { x: x, y: y, size: size, color: clr, speedX: speedX, speedY: speedY };
+  }
+  
+  function createLandPoint(ndx, noiseScale, heightScale) {
+	let x = map(ndx, 0, 100, 0, width);
+	let y = map(noise(ndx * noiseScale), 0, 1, height * heightScale, height);
+	let landPoint = {
+	  x: x,
+	  y: y
+	};
+  
+	return landPoint;
+  }
+  
 function draw() {
   // Set the background color
   background(0);
@@ -266,6 +288,9 @@ function draw() {
       smallHearts.splice(i, 1);
     }
   }
+
+  // Draw the conversation
+  drawConversation();
 }
 
 function drawTree(x, y, trunkHeight, trunkWidth, canopySize, canopyColor, leafShape) {
@@ -314,30 +339,35 @@ function drawHeart(heart) {
   bezierVertex(heart.x - heart.size / 2, heart.y - heart.size / 2, heart.x - heart.size, heart.y + heart.size / 3, heart.x, heart.y + heart.size);
   bezierVertex(heart.x + heart.size, heart.y + heart.size / 3, heart.x + heart.size / 2, heart.y - heart.size / 2, heart.x, heart.y);
   endShape(CLOSE);
+  
+  // Update penguins' positions if not dragging
+  if (!draggingPenguin && !draggingHeart) {
+  // Move the heart upwards and horizontally if not dragging
+  if (!draggingHeart) {
+    heart.y -= heart.speedY;
+    heart.x += heart.speedX;
 
-  // Move the heart upwards and horizontally
-  heart.y -= heart.speedY;
-  heart.x += heart.speedX;
-
-  // Wrap around the screen
-  if (heart.y < 0) {
-    heart.y = height;
+    // Wrap around the screen
+    if (heart.y < 0) {
+      heart.y = height;
+    }
+    if (heart.x > width) {
+      heart.x = 0;
+    } else if (heart.x < 0) {
+      heart.x = width;
+    }
   }
-  if (heart.x > width) {
-    heart.x = 0;
-  } else if (heart.x < 0) {
-    heart.x = width;
-  }
 
+    penguins[0].x = heart.x - 16;
+    penguins[0].y = heart.y + heart.size + 50;
+    penguins[1].x = heart.x + 16;
+    penguins[1].y = heart.y + heart.size + 50;
+  }
   // Draw the string
   stroke(255);
   line(heart.x, heart.y + heart.size, heart.x, heart.y + heart.size + 50);
 
-  // Update penguins' positions
-  penguins[0].x = heart.x - 10;
-  penguins[0].y = heart.y + heart.size + 50;
-  penguins[1].x = heart.x + 10;
-  penguins[1].y = heart.y + heart.size + 50;
+
 }
 
 function drawPenguin(penguin) {
@@ -379,14 +409,67 @@ function drawSmallHeart(heart) {
   endShape(CLOSE);
 }
 
+function drawConversation() {
+  let currentPair = conversationPairs[currentPhraseIndex];
+  let penguin1 = penguins[0];
+  let penguin2 = penguins[1];
+
+  fill(255);
+  textSize(20);
+  textAlign(CENTER);
+  if (showQuestion) {
+    text(currentPair[0], penguin1.x, penguin1.y - penguin1.size * 1.5);
+  } else {
+    text(currentPair[1], penguin2.x, penguin2.y - penguin2.size * 1.5);
+  }
+
+  // Update the phrase timer
+  phraseTimer += deltaTime;
+  if (phraseTimer > phraseInterval) {
+    phraseTimer = 0;
+    if (showQuestion) {
+      showQuestion = false;
+    } else {
+      showQuestion = true;
+      currentPhraseIndex = int(random(conversationPairs.length));
+    }
+  }
+}
+
 function mousePressed() {
-  for (let penguin of penguins) {
-    let d = dist(mouseX, mouseY, penguin.x, penguin.y);
-    if (d < penguin.size) {
-      for (let i = 0; i < 20; i++) {
-        let smallHeart = createSmallHeart(penguin.x, penguin.y);
-        smallHearts.push(smallHeart);
+  let d = dist(mouseX, mouseY, heartBalloon.x, heartBalloon.y);
+  if (d < heartBalloon.size) {
+    draggingHeart = true;
+    offsetX = heartBalloon.x - mouseX;
+    offsetY = heartBalloon.y - mouseY;
+  } else {
+    for (let penguin of penguins) {
+      let d = dist(mouseX, mouseY, penguin.x, penguin.y);
+      if (d < penguin.size) {
+        draggingPenguin = penguin;
+        offsetX = penguin.x - mouseX;
+        offsetY = penguin.y - mouseY;
+        break;
       }
     }
   }
+}
+
+function mouseDragged() {
+  if (draggingHeart) {
+    heartBalloon.x = mouseX + offsetX;
+    heartBalloon.y = mouseY + offsetY;
+    penguins[0].x = heartBalloon.x - 16;
+    penguins[0].y = heartBalloon.y + heartBalloon.size + 50;
+    penguins[1].x = heartBalloon.x + 16;
+    penguins[1].y = heartBalloon.y + heartBalloon.size + 50;
+  } else if (draggingPenguin) {
+    draggingPenguin.x = mouseX + offsetX;
+    draggingPenguin.y = mouseY + offsetY;
+  }
+}
+
+function mouseReleased() {
+  draggingPenguin = null;
+  draggingHeart = false;
 }

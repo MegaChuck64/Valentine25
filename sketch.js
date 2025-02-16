@@ -14,6 +14,7 @@ let moonY = 0;
 let conversationPairs = [
   ["Would you be my valentine?", "Yes!"],
   ["I love you my princess!", "I love you my prince!"],
+  ["Can I give you a pebble?", "Yes! Thank you for my pebble!"],
   ["I love you.", "I love you too."],
   ["I love you more.", "No, I love you more."],
   ["No, I am the one who loves you more.", "Nu-uh, It is I. I love you more."],
